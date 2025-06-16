@@ -7,21 +7,30 @@ import {
   createRootRouteWithContext,
   useRouteContext,
 } from "@tanstack/react-router";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import * as React from "react";
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { NotFound } from "@/components/NotFound";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ModeToggle } from "@/components/mode-toggle";
 import appCss from "@/styles/app.css?url";
 import { seo } from "@/lib/utils/seo";
 import { QueryClient } from "@tanstack/react-query";
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, useAuth, UserButton } from "@clerk/tanstack-react-start";
+import {
+  ClerkProvider,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  useAuth,
+  UserButton,
+} from "@clerk/tanstack-react-start";
 import { ConvexReactClient } from "convex/react";
 import { ConvexQueryClient } from "@convex-dev/react-query";
-import { createServerFn, Meta } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
 import { getAuth } from "@clerk/tanstack-react-start/server";
 import { getWebRequest } from "@tanstack/react-start/server";
-import { ConvexProviderWithClerk } from 'convex/react-clerk'
+import { ConvexProviderWithClerk } from "convex/react-clerk";
+import { Toaster } from "sonner";
 
 const fetchClerkAuth = createServerFn({ method: "GET" }).handler(async () => {
   const auth = await getAuth(getWebRequest());
@@ -113,32 +122,54 @@ function RootComponent() {
   return (
     <ClerkProvider>
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
-        <RootDocument>
-          <Outlet />
-        </RootDocument>
+        <ThemeProvider defaultTheme="system" storageKey="tcc-ui-theme">
+          <RootDocument>
+            <Outlet />
+          </RootDocument>
+        </ThemeProvider>
       </ConvexProviderWithClerk>
     </ClerkProvider>
   );
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html>
+    <html lang="en">
       <head>
-        <Meta />
+        <HeadContent />
       </head>
-      <body>
-        <div className="p-2 flex gap-2 text-lg">
+      <body className="bg-background text-foreground">
+        <div className="p-2 flex gap-2 text-lg border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <Link
             to="/"
             activeProps={{
-              className: 'font-bold',
+              className: "font-bold text-foreground",
             }}
             activeOptions={{ exact: true }}
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             Home
-          </Link>{' '}
-          <div className="ml-auto">
+          </Link>{" "}
+          <Link
+            to="/polls"
+            activeProps={{
+              className: "font-bold text-foreground",
+            }}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Polls
+          </Link>{" "}
+          <Link
+            to="/admin"
+            activeProps={{
+              className: "font-bold text-foreground",
+            }}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Admin
+          </Link>
+          <div className="ml-auto flex items-center gap-2">
+            <ModeToggle />
             <SignedIn>
               <UserButton />
             </SignedIn>
@@ -147,11 +178,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </SignedOut>
           </div>
         </div>
-        <hr />
-        {children}
+        <div className="min-h-screen bg-background">
+          {children}
+        </div>
+        <Toaster richColors position="top-right" />
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>
     </html>
-  )
+  );
 }

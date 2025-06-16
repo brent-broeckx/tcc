@@ -6,6 +6,7 @@ export default defineSchema({
     question: v.string(),
     options: v.array(v.string()),
     creator: v.string(), // Clerk user ID
+    completed: v.optional(v.boolean()), // Whether the poll is completed
   })
     .index("by_creator", ["creator"])
     .index("by_option", ["options"]),

@@ -111,3 +111,79 @@ export const deletePoll = mutation({
     return await ctx.db.delete(args.pollId);
   },
 });
+
+// Toggle poll completion status
+export const togglePollCompletion = mutation({
+  args: { 
+    pollId: v.id("poll"),
+    completed: v.boolean()
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const poll = await ctx.db.get(args.pollId);
+    if (!poll) {
+      throw new Error("Poll not found");
+    }
+    
+    if (poll.creator !== identity.subject) {
+      throw new Error("Not authorized to modify this poll");
+    }
+    
+    return await ctx.db.patch(args.pollId, {
+      completed: args.completed
+    });
+  },
+});
+
+// Get count of active polls
+export const getActivePollsCount = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const polls = await ctx.db.query("poll").collect();
+    return polls.filter(poll => !poll.completed).length;
+  },
+});
+
+// Get count of completed polls
+export const getCompletedPollsCount = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const polls = await ctx.db.query("poll").collect();
+    return polls.filter(poll => poll.completed).length;
+  },
+});
+
+// Get poll statistics (combined query for efficiency)
+export const getPollStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const polls = await ctx.db.query("poll").collect();
+    const activePolls = polls.filter(poll => !poll.completed).length;
+    const completedPolls = polls.filter(poll => poll.completed).length;
+    
+    return {
+      total: polls.length,
+      active: activePolls,
+      completed: completedPolls
+    };
+  },
+});

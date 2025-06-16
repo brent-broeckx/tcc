@@ -166,3 +166,17 @@ export const removeVote = mutation({
     return await ctx.db.delete(existingVote._id);
   },
 });
+
+// Get total vote count across all polls
+export const getTotalVoteCount = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const allVotes = await ctx.db.query("vote").collect();
+    return allVotes.length;
+  },
+});
