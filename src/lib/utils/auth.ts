@@ -1,8 +1,8 @@
 import { getAuth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
-import { redirect } from "@tanstack/react-router";
 import { Roles } from "../types/roles";
+import { useAuth } from "@clerk/tanstack-react-start";
 
 export const isAuthenticated = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -24,7 +24,6 @@ export const checkRole = createServerFn({ method: "GET" })
   async ({ data: role }) => {
     const { userId, sessionClaims } = await getAuth(getWebRequest());
 
-    console.log("sessionClaims", sessionClaims);
     if (!userId) {
       throw new Error("Forbidden");
     }
@@ -36,3 +35,9 @@ export const checkRole = createServerFn({ method: "GET" })
     return sessionClaims?.metadata.role === role
   }
 );
+
+ export const isCurrentUserAdmin = () => {
+    const { sessionClaims } = useAuth();
+  
+    return sessionClaims?.metadata.role === "admin";
+  }

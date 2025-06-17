@@ -9,4 +9,10 @@ declare global {
       role?: Roles
     }
   }
+
+  interface UserIdentity {
+     metadata: {
+      role?: Roles
+    }
+  }
 }

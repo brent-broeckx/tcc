@@ -16,6 +16,7 @@ import { Plus, Vote, Users, CheckCircle, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { CreatePollDialog } from "@/components/CreatePollDialog";
 import { toast } from "sonner";
+import { isCurrentUserAdmin } from "@/lib/utils/auth";
 
 export const Route = createFileRoute("/_authed/polls/")({
   component: PollsPage,
@@ -24,14 +25,15 @@ export const Route = createFileRoute("/_authed/polls/")({
       ...convexQuery(api.poll.getPolls, {}),
       gcTime: 10000,
     });
-  }
+  },
 });
 
 function PollsPage() {
   const { isSignedIn } = useAuth();
-  const [showCreateDialog, setShowCreateDialog] = useState(false);  const { data: polls, isLoading } = useQuery(
-    { ...convexQuery(api.poll.getPolls, {})}
-  );
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const { data: polls, isLoading } = useQuery({
+    ...convexQuery(api.poll.getPolls, {}),
+  });
 
   if (!isSignedIn) {
     return (
@@ -109,7 +111,9 @@ function PollCard({ poll }: { readonly poll: any }) {
     convexQuery(api.vote.getVoteCounts, { pollId: poll._id })
   );
 
-  const toggleCompletionMutation = useConvexMutation(api.poll.togglePollCompletion);
+  const toggleCompletionMutation = useConvexMutation(
+    api.poll.togglePollCompletion
+  );
 
   const totalVotes = voteCounts
     ? Object.values(voteCounts).reduce(
@@ -123,13 +127,17 @@ function PollCard({ poll }: { readonly poll: any }) {
   const handleToggleCompletion = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation to poll detail
     e.stopPropagation();
-    
+
     try {
       await toggleCompletionMutation({
         pollId: poll._id,
-        completed: !poll.completed
+        completed: !poll.completed,
       });
-      toast.success(poll.completed ? "Poll reopened successfully!" : "Poll completed successfully!");
+      toast.success(
+        poll.completed
+          ? "Poll reopened successfully!"
+          : "Poll completed successfully!"
+      );
     } catch (error) {
       console.error("Failed to update poll status:", error);
       toast.error("Failed to update poll status");
@@ -154,7 +162,7 @@ function PollCard({ poll }: { readonly poll: any }) {
                 )}
               </CardDescription>
             </div>
-            {isCreator && (
+            {(isCreator || isCurrentUserAdmin()) && (
               <Button
                 variant={poll.completed ? "outline" : "default"}
                 size="sm"
@@ -175,7 +183,8 @@ function PollCard({ poll }: { readonly poll: any }) {
               </Button>
             )}
           </div>
-        </CardHeader>        <CardContent>
+        </CardHeader>{" "}
+        <CardContent>
           <div className="space-y-2">
             {poll.options.slice(0, 3).map((option: string, index: number) => (
               <div key={index} className="flex items-center justify-between">

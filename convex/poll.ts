@@ -128,8 +128,10 @@ export const togglePollCompletion = mutation({
     if (!poll) {
       throw new Error("Poll not found");
     }
+
+    const metadata = identity?.metadata as { role?: string };
     
-    if (poll.creator !== identity.subject) {
+    if (poll.creator !== identity.subject && metadata?.role !== "admin") {
       throw new Error("Not authorized to modify this poll");
     }
     

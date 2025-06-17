@@ -12,7 +12,6 @@ export const Route = createFileRoute('/_authed')({
     };
   },
   errorComponent: ({ error }) => {
-    console.log('triggering this error');
     if (error.message === "Forbidden") {
       return (
         <div className="flex items-center justify-center p-12">
