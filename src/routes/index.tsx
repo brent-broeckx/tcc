@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/tanstack-react-start";
 import { Vote, BarChart3, Users, Zap } from "lucide-react";
+import { isCurrentUserAdmin } from "@/lib/utils/auth";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -21,13 +22,13 @@ function Home() {
       {/* Hero Section */}
       <div className="text-center py-16">
         <div className="mb-4">
-          <Badge variant="secondary" className="mb-4">
+          <Badge variant="secondary" className="mb-4 animate-pulse">
             <Zap className="w-3 h-3 mr-1" />
             Live Voting Platform
           </Badge>
         </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
-          <span>Create & Vote on</span> {" "}
+          <span>Create & Vote on</span>{" "}
           <span className="text-primary">Live Polls</span>
         </h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -43,12 +44,14 @@ function Home() {
                 View Polls
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/dashboard">
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Dashboard
-              </Link>
-            </Button>
+            {isCurrentUserAdmin() && (
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/dashboard">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Dashboard
+                </Link>
+              </Button>
+            )}
           </SignedIn>
           <SignedOut>
             <Button size="lg" asChild>

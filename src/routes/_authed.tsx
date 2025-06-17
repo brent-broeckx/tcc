@@ -24,9 +24,7 @@ export const Route = createFileRoute('/_authed')({
   },
   component: () => {
     return (
-      <Authenticated >
         <Outlet />
-      </Authenticated>
       
     )
   },

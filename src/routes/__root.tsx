@@ -31,6 +31,7 @@ import { getAuth } from "@clerk/tanstack-react-start/server";
 import { getWebRequest } from "@tanstack/react-start/server";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { Toaster } from "sonner";
+import { isCurrentUserAdmin } from "@/lib/utils/auth";
 
 const fetchClerkAuth = createServerFn({ method: "GET" }).handler(async () => {
   const auth = await getAuth(getWebRequest());
@@ -134,7 +135,7 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
@@ -177,15 +178,18 @@ function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
                 >
                   📊 Polls
                 </Link>
-                <Link
-                  to="/dashboard"
-                  activeProps={{
-                    className: "bg-primary/10 text-primary border-primary/20",
-                  }}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200 border border-transparent"
-                >
-                  ⚙️ Admin
-                </Link>
+
+                {isCurrentUserAdmin() && (
+                  <Link
+                    to="/dashboard"
+                    activeProps={{
+                      className: "bg-primary/10 text-primary border-primary/20",
+                    }}
+                    className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200 border border-transparent"
+                  >
+                    ⚙️ Admin
+                  </Link>
+                )}
               </div>
 
               {/* Mobile Navigation Menu - Simplified for now, you can add a hamburger menu later */}
@@ -247,7 +251,9 @@ function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
             </div>
           </div>
         </nav>{" "}
-        <main className="min-h-[calc(100dvh-4.5rem)] bg-background">{children}</main>
+        <main className="min-h-[calc(100dvh-4.5rem)] bg-background">
+          {children}
+        </main>
         <Toaster richColors position="top-right" />
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
