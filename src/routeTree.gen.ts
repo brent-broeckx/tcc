@@ -9,17 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedAdminRouteImport } from './routes/_authed/_admin'
 import { Route as AuthedPollsIndexRouteImport } from './routes/_authed/polls/index'
 import { Route as AuthedPollsPollIdRouteImport } from './routes/_authed/polls/$pollId'
+import { Route as AuthedAdminDashboardRouteImport } from './routes/_authed/_admin/dashboard'
 
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
@@ -28,6 +24,10 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedAdminRoute = AuthedAdminRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedPollsIndexRoute = AuthedPollsIndexRouteImport.update({
   id: '/polls/',
@@ -39,18 +39,23 @@ const AuthedPollsPollIdRoute = AuthedPollsPollIdRouteImport.update({
   path: '/polls/$pollId',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedAdminDashboardRoute = AuthedAdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthedAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '': typeof AuthedRouteWithChildren
-  '/admin': typeof AdminRoute
+  '': typeof AuthedAdminRouteWithChildren
+  '/dashboard': typeof AuthedAdminDashboardRoute
   '/polls/$pollId': typeof AuthedPollsPollIdRoute
   '/polls': typeof AuthedPollsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '': typeof AuthedRouteWithChildren
-  '/admin': typeof AdminRoute
+  '': typeof AuthedAdminRouteWithChildren
+  '/dashboard': typeof AuthedAdminDashboardRoute
   '/polls/$pollId': typeof AuthedPollsPollIdRoute
   '/polls': typeof AuthedPollsIndexRoute
 }
@@ -58,20 +63,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
-  '/admin': typeof AdminRoute
+  '/_authed/_admin': typeof AuthedAdminRouteWithChildren
+  '/_authed/_admin/dashboard': typeof AuthedAdminDashboardRoute
   '/_authed/polls/$pollId': typeof AuthedPollsPollIdRoute
   '/_authed/polls/': typeof AuthedPollsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '' | '/admin' | '/polls/$pollId' | '/polls'
+  fullPaths: '/' | '' | '/dashboard' | '/polls/$pollId' | '/polls'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '' | '/admin' | '/polls/$pollId' | '/polls'
+  to: '/' | '' | '/dashboard' | '/polls/$pollId' | '/polls'
   id:
     | '__root__'
     | '/'
     | '/_authed'
-    | '/admin'
+    | '/_authed/_admin'
+    | '/_authed/_admin/dashboard'
     | '/_authed/polls/$pollId'
     | '/_authed/polls/'
   fileRoutesById: FileRoutesById
@@ -79,7 +86,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
-  AdminRoute: typeof AdminRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -98,12 +104,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authed/_admin': {
+      id: '/_authed/_admin'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthedAdminRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/_admin/dashboard': {
+      id: '/_authed/_admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthedAdminDashboardRouteImport
+      parentRoute: typeof AuthedAdminRoute
     }
     '/_authed/polls/$pollId': {
       id: '/_authed/polls/$pollId'
@@ -122,12 +135,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthedAdminRouteChildren {
+  AuthedAdminDashboardRoute: typeof AuthedAdminDashboardRoute
+}
+
+const AuthedAdminRouteChildren: AuthedAdminRouteChildren = {
+  AuthedAdminDashboardRoute: AuthedAdminDashboardRoute,
+}
+
+const AuthedAdminRouteWithChildren = AuthedAdminRoute._addFileChildren(
+  AuthedAdminRouteChildren,
+)
+
 interface AuthedRouteChildren {
+  AuthedAdminRoute: typeof AuthedAdminRouteWithChildren
   AuthedPollsPollIdRoute: typeof AuthedPollsPollIdRoute
   AuthedPollsIndexRoute: typeof AuthedPollsIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedAdminRoute: AuthedAdminRouteWithChildren,
   AuthedPollsPollIdRoute: AuthedPollsPollIdRoute,
   AuthedPollsIndexRoute: AuthedPollsIndexRoute,
 }
@@ -138,7 +165,6 @@ const AuthedRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
-  AdminRoute: AdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

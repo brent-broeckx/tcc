@@ -44,7 +44,7 @@ function Home() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link to="/admin">
+              <Link to="/dashboard">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Dashboard
               </Link>

@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { api } from '../../convex/_generated/api'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query'
 import { useAuth } from '@clerk/tanstack-react-start'
@@ -18,8 +17,9 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell }
 import { ArrowLeft, BarChart3, Users, Vote, TrendingUp, CheckCircle, RotateCcw } from 'lucide-react'
 import { useMemo } from 'react'
 import { toast } from 'sonner'
+import { api } from 'convex/_generated/api'
 
-export const Route = createFileRoute('/admin')({
+export const Route = createFileRoute('/_authed/_admin/dashboard')({
   component: AdminDashboard,
 })
 
