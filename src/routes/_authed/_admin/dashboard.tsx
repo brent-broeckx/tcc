@@ -1,57 +1,95 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
-import { convexQuery, useConvexMutation } from '@convex-dev/react-query'
-import { useAuth } from '@clerk/tanstack-react-start'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { 
-  ChartConfig, 
-  ChartContainer, 
-  ChartTooltip, 
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { useAuth } from "@clerk/tanstack-react-start";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
   ChartTooltipContent,
   ChartLegend,
-  ChartLegendContent
-} from '@/components/ui/chart'
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { ArrowLeft, BarChart3, Users, Vote, TrendingUp, CheckCircle, RotateCcw } from 'lucide-react'
-import { useMemo } from 'react'
-import { toast } from 'sonner'
-import { api } from 'convex/_generated/api'
+  ChartLegendContent,
+} from "@/components/ui/chart";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  ArrowLeft,
+  BarChart3,
+  Users,
+  Vote,
+  TrendingUp,
+  CheckCircle,
+  RotateCcw,
+} from "lucide-react";
+import { useMemo } from "react";
+import { toast } from "sonner";
+import { api } from "convex/_generated/api";
+import { seo } from "@/lib/utils/seo";
 
-export const Route = createFileRoute('/_authed/_admin/dashboard')({
+export const Route = createFileRoute("/_authed/_admin/dashboard")({
   component: AdminDashboard,
-})
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Admin Dashboard",
+        description: `Overview of poll analytics and statistics`,
+      }),
+    ],
+  }),
+});
 
 function AdminDashboard() {
-  const { isSignedIn } = useAuth()
+  const { isSignedIn } = useAuth();
   const { data: polls, isLoading: pollsLoading } = useQuery(
     convexQuery(api.poll.getPolls, {})
-  )
+  );
 
   const { data: pollStats, isLoading: pollStatsLoading } = useQuery(
     convexQuery(api.poll.getPollStats, {})
-  )
+  );
 
   const { data: totalVotesCount } = useQuery(
     convexQuery(api.vote.getTotalVoteCount, {})
-  )
+  );
   // Calculate statistics
   const stats = useMemo(() => {
-    if (!polls || !pollStats) return { totalPolls: 0, totalVotes: 0, activePolls: 0, avgVotesPerPoll: 0 }
-    
-    const totalPolls = pollStats.total
-    const totalVotes = totalVotesCount ?? 0
-    const activePolls = pollStats.active
-    const avgVotesPerPoll = totalPolls > 0 ? totalVotes / totalPolls : 0
+    if (!polls || !pollStats)
+      return {
+        totalPolls: 0,
+        totalVotes: 0,
+        activePolls: 0,
+        avgVotesPerPoll: 0,
+      };
+
+    const totalPolls = pollStats.total;
+    const totalVotes = totalVotesCount ?? 0;
+    const activePolls = pollStats.active;
+    const avgVotesPerPoll = totalPolls > 0 ? totalVotes / totalPolls : 0;
 
     return {
       totalPolls,
       totalVotes,
       activePolls,
-      avgVotesPerPoll: Math.round(avgVotesPerPoll * 100) / 100
-    }
-  }, [polls, pollStats, totalVotesCount])
+      avgVotesPerPoll: Math.round(avgVotesPerPoll * 100) / 100,
+    };
+  }, [polls, pollStats, totalVotesCount]);
 
   if (!isSignedIn) {
     return (
@@ -65,9 +103,10 @@ function AdminDashboard() {
             <Link to="/polls">Back to Polls</Link>
           </Button>
         </div>
-      </div>    )
+      </div>
+    );
   }
-  
+
   if (pollsLoading || pollStatsLoading) {
     return (
       <div className="container mx-auto p-6">
@@ -75,7 +114,7 @@ function AdminDashboard() {
           <div className="text-lg">Loading dashboard...</div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -87,7 +126,7 @@ function AdminDashboard() {
             Back to Polls
           </Link>
         </Button>
-        
+
         <div>
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <p className="text-muted-foreground mt-2">
@@ -95,7 +134,6 @@ function AdminDashboard() {
           </p>
         </div>
       </div>
-
       {/* Statistics Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <Card>
@@ -105,9 +143,7 @@ function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalPolls}</div>
-            <p className="text-xs text-muted-foreground">
-              All polls created
-            </p>
+            <p className="text-xs text-muted-foreground">All polls created</p>
           </CardContent>
         </Card>
 
@@ -118,9 +154,7 @@ function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalVotes}</div>
-            <p className="text-xs text-muted-foreground">
-              Across all polls
-            </p>
+            <p className="text-xs text-muted-foreground">Across all polls</p>
           </CardContent>
         </Card>
 
@@ -139,29 +173,27 @@ function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Votes/Poll</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg Votes/Poll
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.avgVotesPerPoll}</div>
-            <p className="text-xs text-muted-foreground">
-              Average engagement
-            </p>
+            <p className="text-xs text-muted-foreground">Average engagement</p>
           </CardContent>
         </Card>
-      </div>      {/* Charts Section */}
+      </div>{" "}
+      {/* Charts Section */}
       <div className="grid gap-6 lg:grid-cols-2 mb-8">
         <PollsOverviewChart polls={polls || []} />
         <RecentActivityChart pollStats={pollStats} />
       </div>
-
       {/* Recent Polls Table */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Polls</CardTitle>
-          <CardDescription>
-            Latest polls and their performance
-          </CardDescription>
+          <CardDescription>Latest polls and their performance</CardDescription>
         </CardHeader>
         <CardContent>
           {!polls || polls.length === 0 ? (
@@ -182,16 +214,19 @@ function AdminDashboard() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 function PollsOverviewChart({ polls }: { readonly polls: any[] }) {
   const chartData = polls.slice(0, 6).map((poll, index) => ({
     name: `Poll ${index + 1}`,
-    question: poll.question.length > 20 ? poll.question.substring(0, 20) + '...' : poll.question,
+    question:
+      poll.question.length > 20
+        ? poll.question.substring(0, 20) + "..."
+        : poll.question,
     votes: 0, // We'll calculate this properly
-    options: poll.options.length
-  }))
+    options: poll.options.length,
+  }));
 
   const chartConfig = {
     votes: {
@@ -202,22 +237,20 @@ function PollsOverviewChart({ polls }: { readonly polls: any[] }) {
       label: "Options",
       color: "hsl(var(--chart-2))",
     },
-  } satisfies ChartConfig
+  } satisfies ChartConfig;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Poll Performance</CardTitle>
-        <CardDescription>
-          Votes and options per poll
-        </CardDescription>
+        <CardDescription>Votes and options per poll</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData}>
-              <XAxis 
-                dataKey="name" 
+              <XAxis
+                dataKey="name"
                 tick={{ fontSize: 12 }}
                 tickLine={false}
                 axisLine={false}
@@ -229,81 +262,95 @@ function PollsOverviewChart({ polls }: { readonly polls: any[] }) {
               />
               <ChartTooltip content={<ChartTooltipContent />} />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar dataKey="votes" fill="var(--color-votes)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="options" fill="var(--color-options)" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="votes"
+                fill="var(--color-votes)"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="options"
+                fill="var(--color-options)"
+                radius={[4, 4, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function RecentActivityChart({ pollStats }: { readonly pollStats: any }) {
   const data = [
     { name: "Active", value: pollStats?.active ?? 0 },
     { name: "Completed", value: pollStats?.completed ?? 0 },
-  ]
+  ];
 
-  const COLORS = [
-    "var(--chart-1)",
-    "var(--chart-2)"
-  ]
+  const COLORS = ["var(--chart-1)", "var(--chart-2)"];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Poll Status</CardTitle>
-        <CardDescription>
-          Distribution of poll statuses
-        </CardDescription>
+        <CardDescription>Distribution of poll statuses</CardDescription>
       </CardHeader>
       <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                dataKey="value"
-                label={({ name, value }) => `${name}: ${value}`}
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index]} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              dataKey="value"
+              label={({ name, value }) => `${name}: ${value}`}
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index]} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function PollAnalyticsRow({ poll }: { readonly poll: any }) {
   const { data: voteCounts } = useQuery(
     convexQuery(api.vote.getVoteCounts, { pollId: poll._id })
-  )
-  
-  const toggleCompletionMutation = useConvexMutation(api.poll.togglePollCompletion)
+  );
 
-  const totalVotes = voteCounts ? Object.values(voteCounts).reduce((sum: number, count: number) => sum + count, 0) : 0
+  const toggleCompletionMutation = useConvexMutation(
+    api.poll.togglePollCompletion
+  );
+
+  const totalVotes = voteCounts
+    ? Object.values(voteCounts).reduce(
+        (sum: number, count: number) => sum + count,
+        0
+      )
+    : 0;
 
   const handleToggleCompletion = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
+    e.preventDefault();
+    e.stopPropagation();
+
     try {
       await toggleCompletionMutation({
         pollId: poll._id,
-        completed: !poll.completed
-      })
-      toast.success(poll.completed ? "Poll reopened successfully!" : "Poll completed successfully!")
+        completed: !poll.completed,
+      });
+      toast.success(
+        poll.completed
+          ? "Poll reopened successfully!"
+          : "Poll completed successfully!"
+      );
     } catch (error) {
-      console.error("Failed to update poll status:", error)
-      toast.error("Failed to update poll status")
+      console.error("Failed to update poll status:", error);
+      toast.error("Failed to update poll status");
     }
-  }
+  };
 
   return (
     <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -316,7 +363,11 @@ function PollAnalyticsRow({ poll }: { readonly poll: any }) {
       </div>
       <div className="flex items-center gap-2">
         <Badge variant={poll.completed ? "destructive" : "secondary"}>
-          {poll.completed ? 'Completed' : totalVotes > 0 ? 'Active' : 'No votes'}
+          {poll.completed
+            ? "Completed"
+            : totalVotes > 0
+            ? "Active"
+            : "No votes"}
         </Badge>
         <Button
           variant={poll.completed ? "outline" : "default"}
@@ -342,5 +393,5 @@ function PollAnalyticsRow({ poll }: { readonly poll: any }) {
         </Button>
       </div>
     </div>
-  )
+  );
 }

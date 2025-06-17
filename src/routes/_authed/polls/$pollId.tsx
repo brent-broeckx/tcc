@@ -1,40 +1,64 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { api } from '../../../../convex/_generated/api'
-import { useQuery } from '@tanstack/react-query'
-import { convexQuery, useConvexMutation } from '@convex-dev/react-query'
-import { SignInButton, useAuth } from '@clerk/tanstack-react-start'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { ArrowLeft, Check, Users, Vote, CheckCircle, RotateCcw } from 'lucide-react'
-import { toast } from 'sonner'
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { api } from "../../../../convex/_generated/api";
+import { useQuery } from "@tanstack/react-query";
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { SignInButton, useAuth } from "@clerk/tanstack-react-start";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  ArrowLeft,
+  Check,
+  Users,
+  Vote,
+  CheckCircle,
+  RotateCcw,
+} from "lucide-react";
+import { toast } from "sonner";
+import { seo } from "@/lib/utils/seo";
 
-export const Route = createFileRoute('/_authed/polls/$pollId')({
+export const Route = createFileRoute("/_authed/polls/$pollId")({
   component: PollDetailPage,
-})
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Live Polls",
+        description: `Create and participate in live polls`,
+      }),
+    ],
+  }),
+});
 
 function PollDetailPage() {
-  const { pollId } = Route.useParams()
-  const { isSignedIn, userId } = useAuth()
-  
+  const { pollId } = Route.useParams();
+  const { isSignedIn, userId } = useAuth();
+
   const { data: poll, isLoading: pollLoading } = useQuery(
     convexQuery(api.poll.getPoll, { pollId: pollId as any })
-  )
+  );
   const { data: voteCounts } = useQuery(
     convexQuery(api.vote.getVoteCounts, { pollId: pollId as any })
-  )
+  );
 
   const { data: hasVoted } = useQuery(
     convexQuery(api.vote.hasUserVoted, { pollId: pollId as any })
-  )
+  );
 
   const { data: userVotes } = useQuery(
-    convexQuery(api.vote.getVotesByVoter, { voter: userId ?? '' })
-  )
-  const castVoteMutation = useConvexMutation(api.vote.castVote)
-  const updateVoteMutation = useConvexMutation(api.vote.updateVote)
-  const toggleCompletionMutation = useConvexMutation(api.poll.togglePollCompletion)
+    convexQuery(api.vote.getVotesByVoter, { voter: userId ?? "" })
+  );
+  const castVoteMutation = useConvexMutation(api.vote.castVote);
+  const updateVoteMutation = useConvexMutation(api.vote.updateVote);
+  const toggleCompletionMutation = useConvexMutation(
+    api.poll.togglePollCompletion
+  );
 
   if (!isSignedIn) {
     return (
@@ -45,11 +69,11 @@ function PollDetailPage() {
             Please sign in to view and vote on this poll.
           </p>
           <Button size="lg" asChild>
-              <SignInButton mode="modal">Get Started</SignInButton>
-            </Button>
+            <SignInButton mode="modal">Get Started</SignInButton>
+          </Button>
         </div>
       </div>
-    )
+    );
   }
 
   if (pollLoading) {
@@ -59,7 +83,7 @@ function PollDetailPage() {
           <div className="text-lg">Loading poll...</div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!poll) {
@@ -75,42 +99,47 @@ function PollDetailPage() {
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
-  const totalVotes = voteCounts ? Object.values(voteCounts).reduce((sum: number, count: number) => sum + count, 0) : 0
-    const userVote = userVotes?.find(vote => vote.pollId === pollId)
-  const userVotedOption = userVote?.optionIndex
-    const handleVote = (optionIndex: number) => {
+  const totalVotes = voteCounts
+    ? Object.values(voteCounts).reduce(
+        (sum: number, count: number) => sum + count,
+        0
+      )
+    : 0;
+  const userVote = userVotes?.find((vote) => vote.pollId === pollId);
+  const userVotedOption = userVote?.optionIndex;
+  const handleVote = (optionIndex: number) => {
     if (poll.completed) {
-      toast.error("This poll has been completed and voting is disabled.")
-      return
+      toast.error("This poll has been completed and voting is disabled.");
+      return;
     }
-    
+
     if (hasVoted) {
-      updateVoteMutation(
-        { pollId: pollId as any, optionIndex },
-      )
+      updateVoteMutation({ pollId: pollId as any, optionIndex });
     } else {
-      castVoteMutation(
-        { pollId: pollId as any, optionIndex },
-      )
+      castVoteMutation({ pollId: pollId as any, optionIndex });
     }
-  }
+  };
   const handleToggleCompletion = async () => {
     try {
       await toggleCompletionMutation({
         pollId: pollId as any,
-        completed: !poll.completed
-      })
-      toast.success(poll.completed ? "Poll reopened successfully!" : "Poll completed successfully!")
+        completed: !poll.completed,
+      });
+      toast.success(
+        poll.completed
+          ? "Poll reopened successfully!"
+          : "Poll completed successfully!"
+      );
     } catch (error) {
-      console.error("Failed to update poll status:", error)
-      toast.error("Failed to update poll status")
+      console.error("Failed to update poll status:", error);
+      toast.error("Failed to update poll status");
     }
-  }
+  };
 
-  const isCreator = poll.creator === userId
+  const isCreator = poll.creator === userId;
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -121,7 +150,8 @@ function PollDetailPage() {
             Back to Polls
           </Link>
         </Button>
-      </div>      <Card>
+      </div>{" "}
+      <Card>
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -170,25 +200,30 @@ function PollDetailPage() {
         <CardContent>
           <div className="space-y-4">
             {poll.options.map((option: string, index: number) => {
-              const voteCount = voteCounts?.[index] ?? 0
-              const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0
-              const isUserChoice = userVotedOption === index
-              
-              return (                <div
+              const voteCount = voteCounts?.[index] ?? 0;
+              const percentage =
+                totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
+              const isUserChoice = userVotedOption === index;
+
+              return (
+                <div
                   key={index}
                   className={`border rounded-lg p-4 transition-all ${
-                    poll.completed 
-                      ? 'opacity-60 cursor-not-allowed' 
-                      : 'hover:shadow-md cursor-pointer'
+                    poll.completed
+                      ? "opacity-60 cursor-not-allowed"
+                      : "hover:shadow-md cursor-pointer"
                   } ${
-                    isUserChoice ? 'border-primary bg-primary/5' : 'border-border'
+                    isUserChoice
+                      ? "border-primary bg-primary/5"
+                      : "border-border"
                   }`}
                   onClick={() => handleVote(index)}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{option}</span>
-                      {isUserChoice && (                        <Badge variant="default">
+                      {isUserChoice && (
+                        <Badge variant="default">
                           <Check className="w-3 h-3 mr-1" />
                           Your vote
                         </Badge>
@@ -198,16 +233,15 @@ function PollDetailPage() {
                       <span className="text-sm text-muted-foreground">
                         {voteCount} votes
                       </span>
-                      <Badge variant="outline">
-                        {percentage.toFixed(1)}%
-                      </Badge>
+                      <Badge variant="outline">{percentage.toFixed(1)}%</Badge>
                     </div>
                   </div>
                   <Progress value={percentage} className="h-2" />
                 </div>
-              )
+              );
             })}
-          </div>          {!hasVoted && !poll.completed && (
+          </div>{" "}
+          {!hasVoted && !poll.completed && (
             <div className="mt-6 p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Vote className="w-4 h-4" />
@@ -215,7 +249,6 @@ function PollDetailPage() {
               </div>
             </div>
           )}
-
           {hasVoted && !poll.completed && (
             <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
@@ -224,7 +257,6 @@ function PollDetailPage() {
               </div>
             </div>
           )}
-
           {poll.completed && (
             <div className="mt-6 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
               <div className="flex items-center gap-2 text-sm text-orange-700 dark:text-orange-300">
@@ -236,5 +268,5 @@ function PollDetailPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

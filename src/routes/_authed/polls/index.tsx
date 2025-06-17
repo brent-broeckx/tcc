@@ -17,8 +17,17 @@ import { useState } from "react";
 import { CreatePollDialog } from "@/components/CreatePollDialog";
 import { toast } from "sonner";
 import { isCurrentUserAdmin } from "@/lib/utils/auth";
+import { seo } from "@/lib/utils/seo";
 
 export const Route = createFileRoute("/_authed/polls/")({
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Live Polls",
+        description: `Create and participate in live polls`,
+      }),
+    ],
+  }),
   component: PollsPage,
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData({
