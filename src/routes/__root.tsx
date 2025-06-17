@@ -150,8 +150,8 @@ function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
                   to="/"
                   className="flex items-center space-x-2 text-xl font-bold text-foreground hover:text-primary transition-colors"
                 >
-                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">TC</span>
+                  <div className="h-8 w-20 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">Live poll</span>
                   </div>
                   <span className="hidden sm:block"></span>
                 </Link>
