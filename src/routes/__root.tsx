@@ -139,48 +139,115 @@ function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
         <HeadContent />
       </head>
       <body className="bg-background text-foreground">
-        <div className="p-2 flex gap-2 text-lg border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <Link
-            to="/"
-            activeProps={{
-              className: "font-bold text-foreground",
-            }}
-            activeOptions={{ exact: true }}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Home
-          </Link>{" "}
-          <Link
-            to="/polls"
-            activeProps={{
-              className: "font-bold text-foreground",
-            }}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Polls
-          </Link>{" "}
-          <Link
-            to="/admin"
-            activeProps={{
-              className: "font-bold text-foreground",
-            }}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Admin
-          </Link>
-          <div className="ml-auto flex items-center gap-2">
-            <ModeToggle />
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal" />
-            </SignedOut>
+        {" "}
+        <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+          <div className="container mx-auto px-4">
+            <div className="flex h-16 items-center justify-between">
+              {/* Logo/Brand Section */}
+              <div className="flex items-center space-x-4">
+                <Link
+                  to="/"
+                  className="flex items-center space-x-2 text-xl font-bold text-foreground hover:text-primary transition-colors"
+                >
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">TC</span>
+                  </div>
+                  <span className="hidden sm:block"></span>
+                </Link>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="hidden md:flex items-center space-x-1">
+                <Link
+                  to="/"
+                  activeProps={{
+                    className: "bg-primary/10 text-primary border-primary/20",
+                  }}
+                  activeOptions={{ exact: true }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200 border border-transparent"
+                >
+                  🏠 Home
+                </Link>
+                <Link
+                  to="/polls"
+                  activeProps={{
+                    className: "bg-primary/10 text-primary border-primary/20",
+                  }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200 border border-transparent"
+                >
+                  📊 Polls
+                </Link>
+                <Link
+                  to="/dashboard"
+                  activeProps={{
+                    className: "bg-primary/10 text-primary border-primary/20",
+                  }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200 border border-transparent"
+                >
+                  ⚙️ Admin
+                </Link>
+              </div>
+
+              {/* Mobile Navigation Menu - Simplified for now, you can add a hamburger menu later */}
+              <div className="flex md:hidden items-center space-x-1">
+                <Link
+                  to="/"
+                  activeProps={{
+                    className: "bg-primary/10 text-primary",
+                  }}
+                  activeOptions={{ exact: true }}
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200"
+                >
+                  🏠
+                </Link>
+                <Link
+                  to="/polls"
+                  activeProps={{
+                    className: "bg-primary/10 text-primary",
+                  }}
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200"
+                >
+                  📊
+                </Link>
+                <Link
+                  to="/dashboard"
+                  activeProps={{
+                    className: "bg-primary/10 text-primary",
+                  }}
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200"
+                >
+                  ⚙️
+                </Link>
+              </div>
+
+              {/* User Actions */}
+              <div className="flex items-center space-x-3">
+                <ModeToggle />
+                <SignedIn>
+                  <div className="flex items-center space-x-2">
+                    <div className="hidden sm:block h-6 w-px bg-border"></div>
+                    <UserButton
+                      appearance={{
+                        elements: {
+                          avatarBox:
+                            "h-8 w-8 ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-200",
+                        },
+                      }}
+                    />
+                  </div>
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                </SignedOut>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="min-h-screen bg-background">
-          {children}
-        </div>
+        </nav>{" "}
+        <main className="min-h-[calc(100dvh-4.5rem)] bg-background">{children}</main>
         <Toaster richColors position="top-right" />
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />

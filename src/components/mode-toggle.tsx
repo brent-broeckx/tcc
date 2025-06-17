@@ -1,52 +1,55 @@
-"use client"
+import { Moon, Sun } from "lucide-react";
 
-import * as React from "react"
-import { Moon, Sun } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { useTheme } from "@/components/theme-provider"
+import { Button } from "@/components/ui/button";
+import { useTheme } from "@/components/theme-provider";
+import { useEffect, useState } from "react";
 
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleTheme = () => {
     if (theme === "light") {
-      setTheme("dark")
+      setTheme("dark");
     } else if (theme === "dark") {
-      setTheme("system")
+      setTheme("system");
     } else {
-      setTheme("light")
+      setTheme("light");
     }
-  }
+  };
 
   const getIcon = () => {
     if (!mounted) {
-      return <Sun className="h-[1.2rem] w-[1.2rem]" />
+      return <Sun className="h-[1.2rem] w-[1.2rem]" />;
     }
 
     if (theme === "dark") {
-      return <Moon className="h-[1.2rem] w-[1.2rem]" />
+      return <Moon className="h-[1.2rem] w-[1.2rem]" />;
     } else if (theme === "light") {
-      return <Sun className="h-[1.2rem] w-[1.2rem]" />
+      return <Sun className="h-[1.2rem] w-[1.2rem]" />;
     } else {
       // system - show appropriate icon based on system preference
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-      return systemTheme === "dark" ? 
-        <Moon className="h-[1.2rem] w-[1.2rem]" /> : 
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
+      return systemTheme === "dark" ? (
+        <Moon className="h-[1.2rem] w-[1.2rem]" />
+      ) : (
         <Sun className="h-[1.2rem] w-[1.2rem]" />
+      );
     }
-  }
+  };
 
   const getTooltipText = () => {
-    if (theme === "light") return "Switch to dark mode"
-    if (theme === "dark") return "Switch to system mode" 
-    return "Switch to light mode"
-  }
+    if (theme === "light") return "Switch to dark mode";
+    if (theme === "dark") return "Switch to system mode";
+    return "Switch to light mode";
+  };
 
   if (!mounted) {
     return (
@@ -54,7 +57,7 @@ export function ModeToggle() {
         <Sun className="h-[1.2rem] w-[1.2rem]" />
         <span className="sr-only">Toggle theme</span>
       </Button>
-    )
+    );
   }
 
   return (
@@ -68,5 +71,5 @@ export function ModeToggle() {
       {getIcon()}
       <span className="sr-only">Toggle theme</span>
     </Button>
-  )
+  );
 }
